@@ -55,6 +55,7 @@ def main():
     tool_calls = chat.choices[0].message.tool_calls
     if not tool_calls or len(tool_calls) == 0:
         print(chat.choices[0].message.content)
+        return
 
     first_tool_call = tool_calls[0]
     if not first_tool_call.function:
