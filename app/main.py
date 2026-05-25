@@ -62,6 +62,7 @@ def main():
 
     if first_tool_call.function.name == "Read":
         arguments = json.loads(first_tool_call.function.arguments)
+        print(arguments)
         f = open(arguments.file_path, "r")
         content = f.read()
         print(content)
