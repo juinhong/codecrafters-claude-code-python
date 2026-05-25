@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import sys
 
@@ -21,23 +22,25 @@ def main():
     chat = client.chat.completions.create(
         model="anthropic/claude-haiku-4.5",
         messages=[{"role": "user", "content": args.p}],
-        tools=[{
-            "type": "function",
-            "function": {
-                "name": "Read",
-                "description": "Read and return the contents of a file",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "file_path": {
-                            "type": "string",
-                            "description": "The path to the file to read",
-                        }
+        tools=[
+            {
+                "type": "function",
+                "function": {
+                    "name": "Read",
+                    "description": "Read and return the contents of a file",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "file_path": {
+                                "type": "string",
+                                "description": "The path to the file to read",
+                            }
+                        },
+                        "required": ["file_path"],
                     },
-                    "required": ["file_path"],
                 },
-            },
-        }],
+            }
+        ],
     )
 
     if not chat.choices or len(chat.choices) == 0:
@@ -46,8 +49,26 @@ def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!", file=sys.stderr)
 
-    # TODO: Uncomment the following line to pass the first stage
-    print(chat.choices[0].message.content)
+    if not chat.choices[0].message:
+        raise RuntimeError("no message in first chat choice")
+
+    tool_calls = chat.choices[0].message.tool_calls
+    if not tool_calls or len(tool_calls) == 0:
+        print(chat.choices[0].message.content)
+
+    first_tool_call = tool_calls[0]
+    if not first_tool_call.function:
+        raise RuntimeError("no function in first tool call")
+
+    if first_tool_call.function.name == "Read":
+        arguments = json.loads(first_tool_call.function.arguments)
+        f = open(arguments.file_path, "r")
+        content = f.read()
+        print(content)
+
+        f.close()
+    else:
+        print("Something went wrong")
 
 
 if __name__ == "__main__":
