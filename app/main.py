@@ -72,7 +72,7 @@ def main():
                 messages.append(
                     {
                         "role": "tool",
-                        "tool_call_id": tool_call["id"],
+                        "tool_call_id": arguments["id"],
                         "content": content,
                     }
                 )
