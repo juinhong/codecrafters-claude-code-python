@@ -37,7 +37,28 @@ def main():
                     "required": ["file_path"],
                 },
             },
-        }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "Write",
+                "description": "Write content to a file",
+                "parameters": {
+                    "type": "object",
+                    "required": ["file_path", "content"],
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "The path of the file to write to",
+                        },
+                        "content": {
+                            "type": "string",
+                            "description": "The content to write to the file",
+                        },
+                    },
+                },
+            },
+        },
     ]
 
     while True:
@@ -78,6 +99,12 @@ def main():
                 )
 
                 f.close()
+            elif tool_call.function.name == "Write":
+                arguments = json.loads(tool_call.function.arguments)
+                file_path = arguments["file_path"]
+                content = arguments["content"]
+                with open(file_path, "w") as file:
+                    file.write(content)
             else:
                 print("Unknown tool, skipping...")
 
