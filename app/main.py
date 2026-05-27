@@ -105,6 +105,13 @@ def main():
                 content = arguments["content"]
                 with open(file_path, "w") as file:
                     file.write(content)
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "content": content,
+                    }
+                )
             else:
                 print("Unknown tool, skipping...")
 
