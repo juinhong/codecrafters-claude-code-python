@@ -132,8 +132,8 @@ def main():
                 )
             elif tool_call.function.name == "Bash":
                 arguments = json.loads(tool_call.function.arguments)
-                command = arguments["command"]
-                result = subprocess.run(command, capture_output=True, text=True)
+                command = arguments["command"].s
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
                 if result.returncode != 0:
                     messages.append(
                         {
