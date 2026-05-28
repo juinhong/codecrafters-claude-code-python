@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import subprocess
 import sys
 
 from openai import OpenAI
@@ -59,6 +60,23 @@ def main():
                 },
             },
         },
+        {
+            "type": "function",
+            "function": {
+                "name": "Bash",
+                "description": "Execute a shell command",
+                "parameters": {
+                    "type": "object",
+                    "required": ["command"],
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "The command to execute",
+                        }
+                    },
+                },
+            },
+        },
     ]
 
     while True:
@@ -112,6 +130,26 @@ def main():
                         "content": content,
                     }
                 )
+            elif tool_call.function.name == "Bash":
+                arguments = json.loads(tool_call.function.arguments)
+                command = arguments["command"]
+                result = subprocess.run(command, capture_output=True, text=True)
+                if result.returncode != 0:
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "content": result.stderr,
+                        }
+                    )
+                else:
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "content": result.stdout,
+                        }
+                    )
             else:
                 print("Unknown tool, skipping...")
 
